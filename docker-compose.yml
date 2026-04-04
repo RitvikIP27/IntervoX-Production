@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./server
+    container_name: intervox-backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./server:/app
+    environment:
+      - PORT=5000
+      - CLIENT_URL=http://localhost:5174
+    restart: unless-stopped
+
+  frontend:
+    build: ./client
+    container_name: intervox-frontend
+    ports:
+      - "5174:5174"
+    volumes:
+      - ./client:/app
+    depends_on:
+      - backend
+    restart: unless-stopped
