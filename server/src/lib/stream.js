@@ -1,35 +1,34 @@
-import {StreamChat} from 'stream-chat';
-import { ENV } from './env.js';
-import { StreamClient } from "@stream-io/node-sdk";
-const apiKey=ENV.STREAM_API_KEY;
-const apiSecret=ENV.STREAM_API_SECRET;
+// 🔥 DEV SAFE STREAM SETUP
 
-if(!apiKey || !apiSecret){
-    console.error('Stream API key or secret is missing');
-}
+let streamClient = null;
+let chatClient = null;
 
-export const chatClient = StreamChat.getInstance(
-  apiKey,
-  apiSecret
-); //this is for chat messaging
+export const getStreamClient = async () => {
+  if (!process.env.STREAM_API_KEY || !process.env.STREAM_SECRET) {
+    console.log("⚠️ Stream disabled (dev mode)");
+    return null;
+  }
 
-export const streamClient= new StreamClient(apiKey,apiSecret) //this will be used for video calling
-
-
-export const upsertStreamUser = async(userData) => {
+  if (!streamClient) {
     try {
-        await chatClient.upsertUser(userData);
-        console.log("Stream user upserted successfully: ", userData);
-    } catch (error) {
-        console.error('Error upserting Stream user:', error);
-    }
-}
+      const { StreamClient } = await import("@stream-io/node-sdk");
 
-export const deleteStreamUser = async(userId) => {
-    try {
-        await chatClient.deleteUser(userId);
-        console.log("Stream user deleted successfully: ", userId);
-    } catch (error) {
-        console.error('Error deleting Stream user:', error);
+      streamClient = new StreamClient(
+        process.env.STREAM_API_KEY,
+        process.env.STREAM_SECRET
+      );
+
+      chatClient = streamClient; // same instance
+
+      console.log("✅ Stream initialized");
+    } catch (err) {
+      console.error("❌ Stream init failed:", err.message);
+      return null;
     }
-}
+  }
+
+  return streamClient;
+};
+
+// ✅ EXPORTS FOR OLD CODE (IMPORTANT)
+export { streamClient, chatClient };
