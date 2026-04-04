@@ -10,6 +10,82 @@ for deploying Intervox to production with enterprise-grade security
 and monitoring baked into every stage.
 
 ---
+## Local Development Mode (Dependency Bypass)
+
+To enable local execution without external services, Intervox was adapted to run in a **dev mode** using mocking, fallbacks, and environment-based logic.
+
+### Problem
+
+The application depends on multiple external services:
+
+- Clerk (authentication)
+- Stream (chat/video)
+- JDoodle (code execution)
+- MongoDB (database)
+- Inngest (event processing)
+
+Without these, the application fails to start or crashes at runtime.
+
+---
+
+### Approach
+
+A dev-mode architecture was implemented using:
+
+- Mocking of external dependencies
+- Graceful degradation (fallback instead of failure)
+- Environment-aware conditional logic
+- Module aliasing (Vite) to override third-party libraries
+
+---
+
+### Backend Changes
+
+- **Database bypass**
+  - Disabled MongoDB connection for local execution
+
+- **Stream fallback**
+  - Skips initialization if API keys are missing
+  - Returns mock responses
+
+- **JDoodle bypass**
+  - Code execution endpoint returns placeholder output
+
+- **Authentication mock**
+  - Injected mock user into request object
+
+---
+
+### Frontend Changes
+
+- Removed dependency on Clerk API keys
+- Implemented module aliasing:
+  - Replaced `@clerk/clerk-react` with local mock (`mockClerk.js`)
+
+- Mocked:
+  - `useUser`, `useAuth`
+  - Auth components (SignedIn, SignedOut, UserButton, etc.)
+
+- Fixed rendering condition:
+  - Ensured `isLoaded` and `isSignedIn` are defined to prevent blank UI
+
+---
+
+### Key Concepts
+
+- Graceful Degradation
+- Dependency Mocking
+- Environment-Based Design
+- Module Aliasing
+
+---
+
+### Result
+
+- Backend runs without external services
+- Frontend renders without authentication provider
+- Application stable for CI/CD pipeline integration
+- Ready for containerization and deployment
 
 ## Architecture Overview
 ![Architecture Diagram](docs/architecture.png)
