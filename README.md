@@ -85,6 +85,39 @@ This repository documents the **full DevSecOps pipeline** built around Intervox,
 
 <br/>
 
+--- 
+
+## 🛡️ Security Stack
+
+| Tool | Category | Purpose | Pipeline Stage |
+|------|----------|---------|----------------|
+| **SonarQube** | SAST | Static source code analysis | Build |
+| **Snyk** | SCA | Dependency vulnerability scanning | Build |
+| **HashiCorp Vault** | Secrets | Secrets management — zero hardcoded credentials | Deploy |
+| **OWASP ZAP** | DAST | Dynamic runtime attack simulation | Post-Deploy |
+| **ELK Stack** | Monitoring | Centralised logging and real-time alerting | Runtime |
+| **Jenkins** | CI/CD | Pipeline orchestration | All Stages |
+| **Docker** | Container | Application containerization | Build |
+| **Kubernetes** | Orchestration | Container deployment and scaling | Deploy |
+
+<br/>
+
+---
+
+## ☁️ Infrastructure Stack
+
+| Technology | Purpose |
+|------------|---------|
+| **AWS EC2** | Compute — Jenkins, SonarQube, Vault hosted here |
+| **AWS S3** | Terraform remote state storage |
+| **AWS IAM** | Access control and least-privilege permissions |
+| **Docker** | Application containerization |
+| **Kubernetes** | Container orchestration at scale |
+| **Terraform** | Infrastructure as Code — all infra versioned |
+
+<br/>
+
+
 ---
 
 ##  Local Development Mode *(Dependency Bypass)*
@@ -151,6 +184,7 @@ Wrote separate Dockerfiles for the frontend and backend services.
 ### Step 2 — Docker Compose
 
 Wrote a `docker-compose.yml` to orchestrate both services together with a single command.
+![Intervox Running](dockercomposeyml.png)
 
 ### Step 3 — Build & Trigger
 
@@ -227,6 +261,7 @@ Built and ran the first pipeline covering stages up to SonarQube analysis.
 <!-- SCREENSHOT: Jenkins pipeline run (SonarQube stage passing) — paste image link below -->
 ![Jenkins Pipeline - SonarQube](PipelinetillSonar.png)
 > *First successful pipeline run with SonarQube analysis stage passing ✅*
+ ![Jenkins Pipeline - SonarQube](SonarPassed.png)
 
 > 📝 **Reminder:** Always rotate your authentication tokens between services to avoid credential expiry errors in later runs.
 
@@ -247,8 +282,11 @@ Quality Gates act as a **final automated gatekeeper** — the build only proceed
 
 If any gate fails → **pipeline stops. No deployment.**
 
+Here My quality Gate gave a green Signal indicating the pipeline to move forward
+![Quality checks passed](qualitygatepassed.png)
+
 <!-- SCREENSHOT: Full pipeline passing with Quality Gates — paste image link below -->
-![Full Pipeline with Quality Gates]("failed at quality gates.png")
+![Full Pipeline with Quality Gates](FailedGates.png)
 > *Complete CI/CD pipeline — from source scan → quality gates → build → deploy to production*
 
 ### What Real DevSecOps Looks Like
