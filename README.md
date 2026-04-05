@@ -52,7 +52,7 @@
 > *Full pipeline architecture — from source code to production with security at every stage*
 
 <!-- SCREENSHOT: Paste your architecture diagram link below -->
-![Architecture Overview](docs/architecture.png)
+![Architecture Overview](devsecops_pipeline_architecture.svg)
 
 <br/>
 
