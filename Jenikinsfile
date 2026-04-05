@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+
+    environment {
+        SONAR_HOME = tool 'SonarScanner'
+    }
+
+    stages {
+
+        stage('Clone Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/RitvikIP27/IntervoX-Production.git'
+            }
+        }
+
+        stage('OWASP Dependency Check') {
+            steps {
+                dependencyCheck additionalArguments: '--scan .', odcInstallation: 'OWASP-dc'
+                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
+            }
+        }
+
+        stage('Trivy Scan (Filesystem)') {
+            steps {
+                sh '''
+                trivy fs --format table -o trivy-report.txt .
+                cat trivy-report.txt
+                '''
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('Sonarauth') {
+                    sh """
+                    ${SONAR_HOME}/bin/sonar-scanner \
+                      -Dsonar.projectKey=intervox \
+                      -Dsonar.projectName=intervox \
+                      -Dsonar.sources=. \
+                      -Dsonar.login=$SONAR_AUTH_TOKEN
+                    """
+                }
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh 'docker-compose build'
+            }
+        }
+
+        stage('Trivy Image Scan') {
+            steps {
+                sh '''
+                trivy image --format table intervox-production_backend
+                trivy image --format table intervox-production_frontend
+                '''
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh '''
+                docker-compose down
+                docker-compose up -d
+                '''
+            }
+        }
+
+    }
+}
